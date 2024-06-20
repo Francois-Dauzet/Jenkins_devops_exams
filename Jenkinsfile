@@ -1,15 +1,15 @@
 pipeline {
     environment {
         DOCKER_ID = "francoisdauzet"
+        DOCKER_TAG = "v.${BUILD_ID}.0"
         DOCKER_PASS = credentials("DOCKER_HUB_PASS")
         KUBECONFIG = credentials("KUBECONFIG")
-        DOCKER_TAG = "v.${BUILD_ID}.0"
     }
     agent any
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/Francois-Dauzet/Jenkins_devops_exams.git', branch: 'master'
+                git url: 'https://github.com/Francois-Dauzet/Jenkins_devops_exams.git', branch: 'master', credentialsId: "${GITHUB_CREDENTIALS}"
             }
         }
         stage('Build and Push Docker Images') {
@@ -34,6 +34,34 @@ pipeline {
                             docker build -t $DOCKER_ID/cast-service:$DOCKER_TAG .
                             docker login -u $DOCKER_ID -p $DOCKER_PASS
                             docker push $DOCKER_ID/cast-service:$DOCKER_TAG
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        stage('Test Acceptance') {
+            parallel {
+                stage('Test Movie Service') {
+                    steps {
+                        script {
+                            sh '''
+                            docker run -d -p 8001:8000 --name movie-service $DOCKER_ID/movie-service:$DOCKER_TAG
+                            sleep 10
+                            curl localhost:8001
+                            docker rm -f movie-service
+                            '''
+                        }
+                    }
+                }
+                stage('Test Cast Service') {
+                    steps {
+                        script {
+                            sh '''
+                            docker run -d -p 8002:8000 --name cast-service $DOCKER_ID/cast-service:$DOCKER_TAG
+                            sleep 10
+                            curl localhost:8002
+                            docker rm -f cast-service
                             '''
                         }
                     }
