@@ -73,45 +73,65 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') { // Deploy to Kubernetes environments
-            parallel {
-                stage('Deploy to Dev') {
-                    steps {
-                        script {
-                            sh '''
-                            mkdir -p ~/.kube
-                            echo "$KUBECONFIG" > ~/.kube/config
-                            kubectl config set-context --current --namespace=dev
-                            helm upgrade --install movie-service movie-service/helm --set image.tag=$DOCKER_TAG --namespace dev
-                            helm upgrade --install cast-service cast-service/helm --set image.tag=$DOCKER_TAG --namespace dev
-                            '''
-                        }
-                    }
+        stage('Deploiement en dev') {
+            environment {
+                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+            steps {
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cp fastapi/values.yaml values.yml
+                    cat values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    helm upgrade --install app fastapi --values=values.yml --namespace dev
+                    '''
                 }
-                stage('Deploy to Staging') {
-                    steps {
-                        script {
-                            sh '''
-                            kubectl config set-context --current --namespace=staging
-                            helm upgrade --install movie-service movie-service/helm --set image.tag=$DOCKER_TAG --namespace staging
-                            helm upgrade --install cast-service cast-service/helm --set image.tag=$DOCKER_TAG --namespace staging
-                            '''
-                        }
-                    }
+            }
+        }
+        stage('Deploiement en staging') {
+            environment {
+                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+            steps {
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cp fastapi/values.yaml values.yml
+                    cat values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    helm upgrade --install app fastapi --values=values.yml --namespace staging
+                    '''
                 }
-                stage('Deploy to Prod') {
-                    steps {
-                        timeout(time: 15, unit: "MINUTES") {
-                            input message: 'Do you want to deploy in production?', ok: 'Yes'
-                        }
-                        script {
-                            sh '''
-                            kubectl config set-context --current --namespace=prod
-                            helm upgrade --install movie-service movie-service/helm --set image.tag=$DOCKER_TAG --namespace prod
-                            helm upgrade --install cast-service cast-service/helm --set image.tag=$DOCKER_TAG --namespace prod
-                            '''
-                        }
-                    }
+            }
+        }
+        stage('Deploiement en prod') {
+            environment {
+                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+            steps {
+                // Create an Approval Button with a timeout of 15minutes.
+                // This requires a manual validation in order to deploy on production environment
+                timeout(time: 15, unit: "MINUTES") {
+                    input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                }
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    cp fastapi/values.yaml values.yml
+                    cat values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
+                    helm upgrade --install app fastapi --values=values.yml --namespace prod
+                    '''
                 }
             }
         }
