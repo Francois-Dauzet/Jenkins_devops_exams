@@ -1,7 +1,7 @@
 pipeline {
-    environment { 
+    environment {
         DOCKER_ID = "francoisdauzet" // replace this with your docker-id
-        DOCKER_IMAGE = "datascientestexam"
+        DOCKER_IMAGE = "datascientestapi"
         DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
     }
     agent any // Jenkins will be able to select all available agents
@@ -41,11 +41,13 @@ pipeline {
                     steps {
                         script {
                             sh '''
+                            docker rm -f movie-service || true
                             docker run -d -p 8001:8000 --name movie-service $DOCKER_ID/movie-service:$DOCKER_TAG
-                            sleep 10
-                            curl localhost:8001
-                            docker rm -f movie-service
                             '''
+                            // Wait for the service to be up
+                            retry(5) {
+                                sh 'sleep 10 && curl -f localhost:8001'
+                            }
                         }
                     }
                 }
@@ -53,11 +55,13 @@ pipeline {
                     steps {
                         script {
                             sh '''
+                            docker rm -f cast-service || true
                             docker run -d -p 8002:8000 --name cast-service $DOCKER_ID/cast-service:$DOCKER_TAG
-                            sleep 10
-                            curl localhost:8002
-                            docker rm -f cast-service
                             '''
+                            // Wait for the service to be up
+                            retry(5) {
+                                sh 'sleep 10 && curl -f localhost:8002'
+                            }
                         }
                     }
                 }
