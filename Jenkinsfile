@@ -1,17 +1,17 @@
 pipeline {
     environment {
-        DOCKER_ID = "francoisdauzet" // replace this with your docker-id
+        DOCKER_ID = "francoisdauzet"
         DOCKER_IMAGE = "datascientestapi"
-        DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
+        DOCKER_TAG = "v.${BUILD_ID}.0"
     }
-    agent any // Jenkins will be able to select all available agents
+    agent any
     stages {
-        stage('Checkout') { // Check out the code from GitHub
+        stage('Checkout') {
             steps {
                 git url: 'https://github.com/Francois-Dauzet/Jenkins_devops_exams.git', branch: 'master'
             }
         }
-        stage('Build Docker Images') { // Build Docker images for the services
+        stage('Build Docker Images') {
             parallel {
                 stage('Build Movie Service') {
                     steps {
@@ -35,7 +35,7 @@ pipeline {
                 }
             }
         }
-        stage('Run Docker Containers') { // Run the containers to ensure they work
+        stage('Run Docker Containers') {
             parallel {
                 stage('Run Movie Service') {
                     steps {
@@ -59,9 +59,9 @@ pipeline {
                 }
             }
         }
-        stage('Push Docker Images') { // Push the Docker images to Docker Hub
+        stage('Push Docker Images') {
             environment {
-                DOCKER_PASS = credentials("DOCKER_HUB_PASS") // retrieve docker password from secret text saved in Jenkins
+                DOCKER_PASS = credentials("DOCKER_HUB_PASS")
             }
             steps {
                 script {
@@ -75,7 +75,7 @@ pipeline {
         }
         stage('Deploiement en dev') {
             environment {
-                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials("config")
             }
             steps {
                 script {
@@ -94,7 +94,7 @@ pipeline {
         }
         stage('Deploiement en staging') {
             environment {
-                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials("config")
             }
             steps {
                 script {
@@ -113,11 +113,9 @@ pipeline {
         }
         stage('Deploiement en prod') {
             environment {
-                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials("config")
             }
             steps {
-                // Create an Approval Button with a timeout of 15minutes.
-                // This requires a manual validation in order to deploy on production environment
                 timeout(time: 15, unit: "MINUTES") {
                     input message: 'Do you want to deploy in production ?', ok: 'Yes'
                 }
