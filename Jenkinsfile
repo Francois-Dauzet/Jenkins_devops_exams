@@ -84,10 +84,10 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp fastapi/values.yaml values.yml
+                    cp movie-service/helm/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app fastapi --values=values.yml --namespace dev
+                    helm upgrade --install app movie-service/helm --values=values.yml --namespace dev
                     '''
                 }
             }
@@ -103,10 +103,10 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp fastapi/values.yaml values.yml
+                    cp movie-service/helm/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app fastapi --values=values.yml --namespace staging
+                    helm upgrade --install app movie-service/helm --values=values.yml --namespace staging
                     '''
                 }
             }
@@ -127,10 +127,10 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp fastapi/values.yaml values.yml
+                    cp movie-service/helm/values.yaml values.yml
                     cat values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app fastapi --values=values.yml --namespace prod
+                    helm upgrade --install app movie-service/helm --values=values.yml --namespace prod
                     '''
                 }
             }
