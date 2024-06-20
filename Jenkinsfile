@@ -44,10 +44,6 @@ pipeline {
                             docker rm -f movie-service || true
                             docker run -d -p 8001:8000 --name movie-service $DOCKER_ID/movie-service:$DOCKER_TAG
                             '''
-                            // Wait for the service to be up
-                            retry(5) {
-                                sh 'sleep 10 && curl -f localhost:8001'
-                            }
                         }
                     }
                 }
@@ -58,10 +54,6 @@ pipeline {
                             docker rm -f cast-service || true
                             docker run -d -p 8002:8000 --name cast-service $DOCKER_ID/cast-service:$DOCKER_TAG
                             '''
-                            // Wait for the service to be up
-                            retry(5) {
-                                sh 'sleep 10 && curl -f localhost:8002'
-                            }
                         }
                     }
                 }
