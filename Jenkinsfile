@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/votre-utilisateur/votre-depot.git'
+                git url: 'https://github.com/Francois-Dauzet/Jenkins_devops_exams.git', branch: 'master'
             }
         }
         stage('Build and Push Docker Images') {
@@ -45,7 +45,7 @@ pipeline {
                 script {
                     sh '''
                     mkdir -p ~/.kube
-                    echo $KUBECONFIG > ~/.kube/config
+                    echo "$KUBECONFIG" > ~/.kube/config
                     kubectl config set-context --current --namespace=dev
                     helm upgrade --install movie-service movie-service/helm --set image.tag=$DOCKER_TAG --namespace dev
                     helm upgrade --install cast-service cast-service/helm --set image.tag=$DOCKER_TAG --namespace dev
@@ -66,6 +66,9 @@ pipeline {
         }
         stage('Deploy to Prod') {
             steps {
+                timeout(time: 15, unit: "MINUTES") {
+                    input message: 'Do you want to deploy in production?', ok: 'Yes'
+                }
                 script {
                     sh '''
                     kubectl config set-context --current --namespace=prod
