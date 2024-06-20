@@ -1,9 +1,10 @@
 pipeline {
     environment {
         DOCKER_ID = "francoisdauzet"
-        DOCKER_TAG = "v.${BUILD_ID}.0"
         DOCKER_PASS = credentials("DOCKER_HUB_PASS")
         KUBECONFIG = credentials("KUBECONFIG")
+        GITHUB_CREDENTIALS = credentials("GITHUB_CREDENTIALS_ID") // Remplacez par l'ID des credentials GitHub
+        DOCKER_TAG = "v.${BUILD_ID}.0"
     }
     agent any
     stages {
