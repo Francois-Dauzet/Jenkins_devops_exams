@@ -1,0 +1,9 @@
+replicaCount: 1
+image:
+  repository: Jenkins_devops_exams/cast-service
+  tag: latest
+service:
+  type: ClusterIP
+  port: 8000
+env:
+  DATABASE_URI: postgresql://cast_db:password@cast_db/cast_db_dev
