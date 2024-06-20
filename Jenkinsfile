@@ -1,16 +1,14 @@
 pipeline {
-    environment {
+    environment { 
         DOCKER_ID = "francoisdauzet" // replace this with your docker-id
+        DOCKER_IMAGE = "datascientestexam"
         DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
-        DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve docker password from secret text called docker_hub_pass saved on jenkins
-        KUBECONFIG = credentials("KUBECONFIG") // we retrieve kubeconfig from secret file called config saved on jenkins
-        GITHUB_CREDENTIALS = credentials("GITHUB_CREDENTIALS_ID") // replace with the ID of your GitHub credentials
     }
     agent any // Jenkins will be able to select all available agents
     stages {
         stage('Checkout') { // Check out the code from GitHub
             steps {
-                git url: 'https://github.com/Francois-Dauzet/Jenkins_devops_exams.git', branch: 'master', credentialsId: "${GITHUB_CREDENTIALS}"
+                git url: 'https://github.com/Francois-Dauzet/Jenkins_devops_exams.git', branch: 'master'
             }
         }
         stage('Build Docker Images') { // Build Docker images for the services
