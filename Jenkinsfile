@@ -60,6 +60,9 @@ pipeline {
             }
         }
         stage('Push Docker Images') { // Push the Docker images to Docker Hub
+            environment {
+                DOCKER_PASS = credentials("DOCKER_HUB_PASS") // retrieve docker password from secret text saved in Jenkins
+            }
             steps {
                 script {
                     sh '''
