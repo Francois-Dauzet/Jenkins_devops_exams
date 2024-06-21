@@ -75,7 +75,7 @@ pipeline {
         }
         stage('Deploiement en dev') {
             environment {
-                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials("config")
             }
             steps {
                 script {
@@ -84,6 +84,7 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
+
                     # Deploy movie-service
                     cp movie-service/helm/values.yaml movie_values.yml
                     cat movie_values.yml
@@ -101,7 +102,7 @@ pipeline {
         }
         stage('Deploiement en staging') {
             environment {
-                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials("config")
             }
             steps {
                 script {
@@ -110,6 +111,7 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
+
                     # Deploy movie-service
                     cp movie-service/helm/values.yaml movie_values.yml
                     cat movie_values.yml
@@ -127,7 +129,7 @@ pipeline {
         }
         stage('Deploiement en prod') {
             environment {
-                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
+                KUBECONFIG = credentials("config")
             }
             steps {
                 timeout(time: 15, unit: "MINUTES") {
@@ -139,6 +141,7 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
+
                     # Deploy movie-service
                     cp movie-service/helm/values.yaml movie_values.yml
                     cat movie_values.yml
