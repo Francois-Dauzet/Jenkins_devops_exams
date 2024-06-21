@@ -73,18 +73,26 @@ pipeline {
                 }
             }
         }
-        stage('Deploiement en dev') {
+        stage('Prepare Kubernetes') {
             environment {
                 KUBECONFIG = credentials("config")
             }
+            steps {
+                script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    echo "$KUBECONFIG" > .kube/config
+                    '''
+                }
+            }
+        }
+        stage('Deploiement en dev') {
             stages {
                 stage('Deploy Movie Service in Dev') {
                     steps {
                         script {
                             sh '''
-                            rm -Rf .kube
-                            mkdir .kube
-                            echo "$KUBECONFIG" > .kube/config
                             cp movie-service/helm/values.yaml movie_values.yml
                             sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" movie_values.yml
                             helm upgrade --install app-movie movie-service/helm --values=movie_values.yml --namespace dev
@@ -106,17 +114,11 @@ pipeline {
             }
         }
         stage('Deploiement en staging') {
-            environment {
-                KUBECONFIG = credentials("config")
-            }
             stages {
                 stage('Deploy Movie Service in Staging') {
                     steps {
                         script {
                             sh '''
-                            rm -Rf .kube
-                            mkdir .kube
-                            echo "$KUBECONFIG" > .kube/config
                             cp movie-service/helm/values.yaml movie_values.yml
                             sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" movie_values.yml
                             helm upgrade --install app-movie movie-service/helm --values=movie_values.yml --namespace staging
@@ -138,9 +140,6 @@ pipeline {
             }
         }
         stage('Deploiement en prod') {
-            environment {
-                KUBECONFIG = credentials("config")
-            }
             steps {
                 timeout(time: 15, unit: "MINUTES") {
                     input message: 'Do you want to deploy in production ?', ok: 'Yes'
@@ -151,9 +150,6 @@ pipeline {
                     steps {
                         script {
                             sh '''
-                            rm -Rf .kube
-                            mkdir .kube
-                            echo "$KUBECONFIG" > .kube/config
                             cp movie-service/helm/values.yaml movie_values.yml
                             sed -i "s+tag:.*+tag: ${DOCKER_TAG}+g" movie_values.yml
                             helm upgrade --install app-movie movie-service/helm --values=movie_values.yml --namespace prod
