@@ -77,7 +77,7 @@ pipeline {
             environment {
                 KUBECONFIG = credentials("config")
             }
-            stages {
+            parallel {
                 stage('Deploy Movie Service') {
                     steps {
                         script {
@@ -109,7 +109,7 @@ pipeline {
             environment {
                 KUBECONFIG = credentials("config")
             }
-            stages {
+            parallel {
                 stage('Deploy Movie Service') {
                     steps {
                         script {
@@ -145,7 +145,7 @@ pipeline {
                 timeout(time: 15, unit: "MINUTES") {
                     input message: 'Do you want to deploy in production ?', ok: 'Yes'
                 }
-                stages {
+                parallel {
                     stage('Deploy Movie Service') {
                         steps {
                             script {
