@@ -75,7 +75,7 @@ pipeline {
         }
         stage('Deploiement en dev') {
             environment {
-                KUBECONFIG = credentials("config")
+                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
             }
             steps {
                 script {
@@ -84,17 +84,24 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp movie-service/helm/values.yaml values.yml
-                    cat values.yml
-                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app movie-service/helm --values=values.yml --namespace dev
+                    # Deploy movie-service
+                    cp movie-service/helm/values.yaml movie_values.yml
+                    cat movie_values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie_values.yml
+                    helm upgrade --install movie-service movie-service/helm --values=movie_values.yml --namespace dev
+
+                    # Deploy cast-service
+                    cp cast-service/helm/values.yaml cast_values.yml
+                    cat cast_values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" cast_values.yml
+                    helm upgrade --install cast-service cast-service/helm --values=cast_values.yml --namespace dev
                     '''
                 }
             }
         }
         stage('Deploiement en staging') {
             environment {
-                KUBECONFIG = credentials("config")
+                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
             }
             steps {
                 script {
@@ -103,17 +110,24 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp movie-service/helm/values.yaml values.yml
-                    cat values.yml
-                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app movie-service/helm --values=values.yml --namespace staging
+                    # Deploy movie-service
+                    cp movie-service/helm/values.yaml movie_values.yml
+                    cat movie_values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie_values.yml
+                    helm upgrade --install movie-service movie-service/helm --values=movie_values.yml --namespace staging
+
+                    # Deploy cast-service
+                    cp cast-service/helm/values.yaml cast_values.yml
+                    cat cast_values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" cast_values.yml
+                    helm upgrade --install cast-service cast-service/helm --values=cast_values.yml --namespace staging
                     '''
                 }
             }
         }
         stage('Deploiement en prod') {
             environment {
-                KUBECONFIG = credentials("config")
+                KUBECONFIG = credentials("config") // we retrieve kubeconfig from secret file called config saved on jenkins
             }
             steps {
                 timeout(time: 15, unit: "MINUTES") {
@@ -125,10 +139,17 @@ pipeline {
                     mkdir .kube
                     ls
                     cat $KUBECONFIG > .kube/config
-                    cp movie-service/helm/values.yaml values.yml
-                    cat values.yml
-                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                    helm upgrade --install app movie-service/helm --values=values.yml --namespace prod
+                    # Deploy movie-service
+                    cp movie-service/helm/values.yaml movie_values.yml
+                    cat movie_values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie_values.yml
+                    helm upgrade --install movie-service movie-service/helm --values=movie_values.yml --namespace prod
+
+                    # Deploy cast-service
+                    cp cast-service/helm/values.yaml cast_values.yml
+                    cat cast_values.yml
+                    sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" cast_values.yml
+                    helm upgrade --install cast-service cast-service/helm --values=cast_values.yml --namespace prod
                     '''
                 }
             }
