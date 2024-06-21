@@ -87,13 +87,11 @@ pipeline {
 
                     # Deploy movie-service
                     cp movie-service/helm/values.yaml movie_values.yml
-                    cat movie_values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie_values.yml
                     helm upgrade --install app-movie movie-service/helm --values=movie_values.yml --namespace dev
 
                     # Deploy cast-service
                     cp cast-service/helm/values.yaml cast_values.yml
-                    cat cast_values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" cast_values.yml
                     helm upgrade --install app-cast cast-service/helm --values=cast_values.yml --namespace dev
                     '''
@@ -114,13 +112,11 @@ pipeline {
 
                     # Deploy movie-service
                     cp movie-service/helm/values.yaml movie_values.yml
-                    cat movie_values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie_values.yml
                     helm upgrade --install app-movie movie-service/helm --values=movie_values.yml --namespace staging
 
                     # Deploy cast-service
                     cp cast-service/helm/values.yaml cast_values.yml
-                    cat cast_values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" cast_values.yml
                     helm upgrade --install app-cast cast-service/helm --values=cast_values.yml --namespace staging
                     '''
@@ -144,13 +140,11 @@ pipeline {
 
                     # Deploy movie-service
                     cp movie-service/helm/values.yaml movie_values.yml
-                    cat movie_values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie_values.yml
                     helm upgrade --install app-movie movie-service/helm --values=movie_values.yml --namespace prod
 
                     # Deploy cast-service
                     cp cast-service/helm/values.yaml cast_values.yml
-                    cat cast_values.yml
                     sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" cast_values.yml
                     helm upgrade --install app-cast cast-service/helm --values=cast_values.yml --namespace prod
                     '''
